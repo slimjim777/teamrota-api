@@ -7,12 +7,15 @@ var rename = require('gulp-rename');
 var concat = require('gulp-concat');
 var shell = require('gulp-shell');
 var jest = require('gulp-jest-iojs');
+var runSequence = require('run-sequence');
 
 
 // jest-cli needs this for node < 0.12
 //require('harmonize')();
 
 var path = {
+    NODE: 'node_modules/',
+    MEDIA: 'media/',
     SRC: 'src/',
     BUILD: 'build/',
     BUILD_FILE: 'bundle.js',
@@ -33,9 +36,15 @@ gulp.task('compile_jsx_components', function(){
         .pipe(gulp.dest(path.BUILD + 'components'));
 });
 
+gulp.task('compile_jsx_models', function(){
+    return gulp.src(path.SRC + 'models/*.js')
+        .pipe(react())
+        .pipe(gulp.dest(path.BUILD + 'models'));
+});
+
 // Concatenate and minimise the Javascript files and copy to dist folder
 // (This has two other tasks as dependencies, which will finish first)
-gulp.task('build_devices', ['compile_jsx', 'compile_jsx_components'], function(){
+gulp.task('build_components', ['compile_jsx', 'compile_jsx_components', 'compile_jsx_models'], function(){
     return gulp.src([path.BUILD + 'app.js'])
         .pipe(browserify({}))
         .on('prebundle', function(bundler) {
@@ -69,5 +78,21 @@ gulp.task('jest', function() {
 
 });
 
+// Copy the bootstrap media files
+gulp.task('bootstrap', function() {
+    return gulp.src([path.NODE + 'bootstrap/dist/**/*'], {base:path.NODE + 'bootstrap/dist'})
+        .pipe(gulp.dest(path.MEDIA + 'bootstrap'));
+})
+
+gulp.task('test', function () {
+    runSequence('jest');
+    gulp.watch([path.SRC + '**/*.js'], ['jest']);
+});
+
+gulp.task('build', function () {
+    runSequence('build_components');
+    gulp.watch([path.SRC + '**/*.js'], ['build_components']);
+});
+
 // Default: remember that these tasks get run asynchronously
-gulp.task('default', ['build_devices']);
+gulp.task('default', ['build_components', 'bootstrap']);

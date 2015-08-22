@@ -1,20 +1,24 @@
-jest.dontMock('../components/About.js');
+jest.dontMock('../components/MyRota.js');
 
 
 describe('About', function() {
     var React = require('react/addons');
-    var About = require('../components/About.js');
+    var MyRota = require('../components/MyRota');
+    var Person = require('../models/person');
     var TestUtils = React.addons.TestUtils;
+
+    var result = Person.findById('1')
+    var name = result.person.firstname + ' ' + result.person.lastname;
     
     it('displays the title', function () {
         var about = TestUtils.renderIntoDocument(
-            <About />
+            <MyRota params="1" />
         );
         expect(TestUtils.isCompositeComponent(about)).toBeTruthy();
 
         // Check the rendered heading is correct
         var heading = TestUtils.findRenderedDOMComponentWithTag(about, 'h2');
-        expect(heading.getDOMNode().textContent).toEqual('About');
+        expect(heading.getDOMNode().textContent).toEqual(name);
 
     });
 
