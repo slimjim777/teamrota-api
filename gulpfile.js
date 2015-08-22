@@ -19,7 +19,7 @@ var path = {
     SRC: 'src/',
     BUILD: 'build/',
     BUILD_FILE: 'bundle.js',
-    DIST: 'dist/'
+    DIST: 'media/dist/'
 };
 
 
