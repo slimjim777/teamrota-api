@@ -1,0 +1,73 @@
+'use strict';
+
+var gulp = require('gulp');
+var react = require('gulp-react');
+var browserify = require('gulp-browserify');
+var rename = require('gulp-rename');
+var concat = require('gulp-concat');
+var shell = require('gulp-shell');
+var jest = require('gulp-jest-iojs');
+
+
+// jest-cli needs this for node < 0.12
+//require('harmonize')();
+
+var path = {
+    SRC: 'src/',
+    BUILD: 'build/',
+    BUILD_FILE: 'bundle.js',
+    DIST: 'dist/'
+};
+
+
+// Compile the JSX files to Javascript in the build directory
+gulp.task('compile_jsx', function(){
+    return gulp.src(path.SRC + '*.js')
+        .pipe(react())
+        .pipe(gulp.dest(path.BUILD));
+});
+
+gulp.task('compile_jsx_components', function(){
+    return gulp.src(path.SRC + 'components/*.js')
+        .pipe(react())
+        .pipe(gulp.dest(path.BUILD + 'components'));
+});
+
+// Concatenate and minimise the Javascript files and copy to dist folder
+// (This has two other tasks as dependencies, which will finish first)
+gulp.task('build_devices', ['compile_jsx', 'compile_jsx_components'], function(){
+    return gulp.src([path.BUILD + 'app.js'])
+        .pipe(browserify({}))
+        .on('prebundle', function(bundler) {
+            // Make React available externally for dev tools
+            bundler.require('react');
+        })
+        .pipe(rename('bundle.js'))
+        //.pipe(uglify())
+        .pipe(gulp.dest(path.DIST));
+});
+
+gulp.task('jest', function() {
+    // So our task doesn't error out when a test fails
+    //ignoreErrors: true
+    return gulp.src('src/__tests__').pipe(jest({
+        scriptPreprocessor: "../../preprocessor.js",
+        unmockedModulePathPatterns: [
+            "node_modules/react"
+        ],
+        testDirectoryName: "src",
+        testPathIgnorePatterns: [
+            "node_modules",
+            "src/support"
+        ],
+        moduleFileExtensions: [
+            "js",
+            "json",
+            "react"
+        ]
+    }));
+
+});
+
+// Default: remember that these tasks get run asynchronously
+gulp.task('default', ['build_devices']);
