@@ -7,14 +7,29 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var session = require('express-session');
+//var cookieSession = require('cookie-session')
+//var redis = require('redis');
+//var redisStore = require('connect-redis')(session);
+var pg = require('pg');
+var pgSession = require('connect-pg-simple')(session);
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var userFromEmail = require('./utils/utils').userFromEmail;
+var SESSION_MAX_AGE = 86400000;
+
+// Create the redis client
+//var redisOptions = require('redis-url').parse(process.env.REDIS_URL);
+//var client = redis.createClient(redisOptions.port, redisOptions.hostname);
+//client.auth(redisOptions.password);
 
 // Passport session setup.
 passport.serializeUser(function(user, done) {
+    console.log('---passport.serializeUser');
+    console.log(user);
     done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
+    console.log('---passport.deserializeUser');
     done(null, obj);
 });
 
@@ -26,43 +41,97 @@ passport.use(new GoogleStrategy({
         clientSecret: process.env.CLIENT_SECRET
     },
     function(request, accessToken, refreshToken, profile, done) {
-        // asynchronous verification, for effect...
-        process.nextTick(function () {
+        // --asynchronous verification, for effect...
+        //process.nextTick(function () {
+            console.log('---------------------session');
+            var records = [];
+            // Get details from the database
+            pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                var query = client.query("SELECT * FROM person WHERE email = $1", [profile.email]);
+
+                query.on('row', function(row) {
+                    console.log(row);
+                    records.push(row);
+                });
+
+                // After all data is returned, close connection and return results
+                query.on('end', function() {
+                    if (records.length > 0) {
+                        request.session.userId = records[0].id;
+                        request.session.email = profile.email;
+                        request.session.name = profile.displayName;
+                        console.log(request.session);
+                    } else {
+                        // TODO: redirect to the error page
+                        request.session = null;
+                        console.log('User not found');
+                    }
+                    request.session.save(function() {
+                        client.end();
+                    });
+
+                });
+
+            });
+
             return done(null, profile);
-        });
+        //});
     }
 ));
 
-
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.set('trust proxy', 1);
 
-// uncomment after placing your favicon in /public
+// Set up middleware
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET));
+//app.use(cookieSession({secret: process.env.APP_SECRET, maxAge: SESSION_MAX_AGE}));
 app.use('/media', express.static(path.join(__dirname, 'media')));
 
 
+
 app.use(session({
-    secret: 'THIS APP SECRET GOES HERE',
-    name:   'rota',
-    proxy:  true,
-    resave: true,
-    saveUninitialized: true
+    store: new pgSession({
+        pg: pg,                                  // Use global pg-module
+        conString: process.env.DATABASE_URL      // Connect using something else than default DATABASE_URL env variable
+    }),
+    secret: process.env.APP_SECRET,
+    saveUninitialized: true,
+    cookie: {maxAge: SESSION_MAX_AGE},
+    resave: true
 }));
+
+/*
+app.use(session({
+    secret: process.env.APP_SECRET,
+    saveUninitialized: true,
+    //store: new redisStore({
+    //    host: redisOptions.hostname,
+    //    port: redisOptions.port,
+    //    db: parseInt(redisOptions.database),
+    //    pass: redisOptions.password,
+    //    ttl: SESSION_MAX_AGE
+    //}),
+    //resave: true
+}));
+*/
+
 app.use( passport.initialize());
 app.use( passport.session());
 
 var routes = require('./routes/index');
 var rota = require('./routes/rota');
 var users = require('./routes/users');
+var people = require('./routes/people');
 
 app.use('/', routes);
 app.use('/rota', rota);
 app.use('/users', users);
+app.use('/api', people);
 
 app.get('/login', function(req, res){
     res.render('login', { user: req.user });
@@ -116,6 +185,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;

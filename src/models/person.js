@@ -1,23 +1,24 @@
-var PEOPLE = [
-    {id: '1', firstname: 'Marty', lastname:'McFly', email: 'marty@mcfly.com'},
-    {id: '2', firstname: 'Emmet', lastname:'Brown', email: 'emmet@brown.com'},
-    {id: '3', firstname: 'Biff', lastname:'Tannen', email: 'biff@tannen.com'},
-    {id: '4', firstname: 'Biff', lastname:'Tannen', email: 'biff@tannen.com'},
-]
+var request = require('request');
+var $ = require('jquery');
+
 
 var Person = {
-
+    url: '/api/people',
     USERID: '1',
 
+    me: function() {
+        return $.get(this.url + '/permissions');
+    },
+
     findById: function(personId) {
-        // Use a fixture for now
-        var index = parseInt(personId) - 1;
-        if (index >= PEOPLE.length) {
-            index = 4;
+        if (!personId) {
+            // Get the current user's details
+            return $.get(this.url + '/me');
+        } else {
+            return $.get(this.url + '/' + personId);
         }
-        return {'response': 'Success', person: PEOPLE[index]}
     }
 
-}
+};
 
 module.exports = Person;

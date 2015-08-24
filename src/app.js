@@ -13,7 +13,7 @@ var NavItem = require('react-bootstrap').NavItem;
 
 
 var App = React.createClass({
-    render () {
+    render: function() {
         return (
             <div>
                 <Navbar brand='Team Rota'>
@@ -23,9 +23,7 @@ var App = React.createClass({
                         <NavItem eventKey={3} href="#/events">Events</NavItem>
                     </Nav>
                 </Navbar>
-                <div id="main" className="container-fluid" role="main">
-                    <RouteHandler/>
-                </div>
+                <RouteHandler/>
             </div>
         );
     }

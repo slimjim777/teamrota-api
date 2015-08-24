@@ -8,6 +8,7 @@ var concat = require('gulp-concat');
 var shell = require('gulp-shell');
 var jest = require('gulp-jest-iojs');
 var runSequence = require('run-sequence');
+var minifyCss = require('gulp-minify-css');
 
 
 // jest-cli needs this for node < 0.12
@@ -78,6 +79,12 @@ gulp.task('jest', function() {
 
 });
 
+gulp.task('minify-css', function() {
+    return gulp.src(path.MEDIA + 'css/app.css')
+        .pipe(minifyCss())
+        .pipe(gulp.dest(path.MEDIA + 'css/dist/'));
+});
+
 // Copy the bootstrap media files
 gulp.task('bootstrap', function() {
     return gulp.src([path.NODE + 'bootstrap/dist/**/*'], {base:path.NODE + 'bootstrap/dist'})
@@ -95,4 +102,4 @@ gulp.task('build', function () {
 });
 
 // Default: remember that these tasks get run asynchronously
-gulp.task('default', ['build_components', 'bootstrap']);
+gulp.task('default', ['build_components', 'bootstrap', 'minify-css']);

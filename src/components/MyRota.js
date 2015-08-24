@@ -8,18 +8,22 @@ var MyRota = React.createClass({
     },
 
     componentDidMount: function () {
-        var id = this.props.params.id;
-        if (!id) {
-            id = Person.USERID;
-        }
-        console.log(id);
-        var result = Person.findById(id);
-        this.setState({ person: result.person });
+        var self = this;
+
+        var result = Person.findById();
+        result.done(function(data) {
+            self.setState({ person: data });
+            self.forceUpdate();
+        });
+    },
+
+    componentWillUnmount: function () {
+        $(document).off("dataChange", this.callback);
     },
 
     render: function () {
         return (
-            <div>
+            <div id="main" className="container-fluid" role="main">
                 <h2 className="sub-heading">{this.state.person.firstname} {this.state.person.lastname}</h2>
                 <p className="sub-heading">{this.state.person.email}</p>
             </div>
