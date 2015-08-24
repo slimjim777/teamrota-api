@@ -60,6 +60,7 @@ var React = require('react');
 var Router = require('react-router');
 var Route = Router.Route;
 var RouteHandler = Router.RouteHandler;
+var DefaultRoute = Router.DefaultRoute;
 var MyRota = require('./components/MyRota');
 var People = require('./components/People');
 var Events = require('./components/Events');
@@ -92,6 +93,7 @@ var App = React.createClass({displayName: "App",
 // Declare our routes and their hierarchy
 var routes = (
     React.createElement(Route, {handler: App}, 
+        React.createElement(DefaultRoute, {handler: MyRota}), 
         React.createElement(Route, {path: "me", handler: MyRota}), 
         React.createElement(Route, {path: "people", handler: People}), 
         React.createElement(Route, {path: "events", handler: Events})
