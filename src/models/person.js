@@ -17,6 +17,10 @@ var Person = {
         } else {
             return $.get(this.url + '/' + personId);
         }
+    },
+
+    rota: function(personId) {
+        return $.get(this.url + '/' + personId + '/rota');
     }
 
 };

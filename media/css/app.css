@@ -79,7 +79,7 @@ label.dialog {
 }
 
 .spinner {
-    background-image: url('../../media/images/ajax-loader.gif');
+    background-image: url('/media/images/ajax-loader.gif');
     background-repeat: no-repeat;
     width: 16px;
 }

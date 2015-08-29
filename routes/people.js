@@ -57,5 +57,10 @@ router.route('/people/:id')
         res.json(person);
     });
 
+router.route('/people/:id/rota')
+    .get(apiAuthenticated, function(req, res) {
+        res.json([{id:'1', date:'1', name:'hello'}, {id:'2', date:'2', name:'world'}]);
+    });
+
 
 module.exports = router;
