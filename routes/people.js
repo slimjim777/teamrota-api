@@ -1,19 +1,15 @@
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
+var moment = require('moment');
 var apiAuthenticated = require('../utils/utils').apiAuthenticated;
+var sql = require('../utils/query');
 
-var PEOPLE = [
-    {id: '1', firstname: 'Marty', lastname:'McFly', email: 'marty@mcfly.com'},
-    {id: '2', firstname: 'Emmet', lastname:'Brown', email: 'emmet@brown.com'},
-    {id: '3', firstname: 'Biff', lastname:'Tannen', email: 'biff@tannen.com'},
-    {id: '4', firstname: 'Biff', lastname:'Tannen', email: 'biff@tannen.com'},
-];
+var RANGE = 12;
 
 
 router.route('/people')
     .get(apiAuthenticated, function(req, res) {
-        console.log('people get');
         res.json(PEOPLE);
     })
     .post(apiAuthenticated, function(req, res) {
@@ -48,7 +44,6 @@ router.route('/people/me')
 
 router.route('/people/:id')
     .get(apiAuthenticated, function(req, res) {
-        console.log('people get: ' + req.params.id);
         var index = parseInt(req.params.id) - 1;
         if (index >= PEOPLE.length) {
             index = 4;
@@ -58,8 +53,68 @@ router.route('/people/:id')
     });
 
 router.route('/people/:id/rota')
-    .get(apiAuthenticated, function(req, res) {
-        res.json([{id:'1', date:'1', name:'hello'}, {id:'2', date:'2', name:'world'}]);
+    .post(apiAuthenticated, function(req, res) {
+        // Calculate the from and to dates
+        var range = parseInt(req.body.range);
+        var fromDate;
+        var toDate;
+        if (range > 0) {
+            fromDate = moment().add(range - RANGE, 'weeks');
+            toDate = moment().add(range, 'weeks');
+        } else {
+            toDate = moment().add(range, 'weeks');
+            fromDate = moment().add(range - RANGE, 'weeks');
+        }
+
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+            var query = client.query(
+                sql.rotaForPerson(), [req.params.id, fromDate.format('YYYY-MM-DD'), toDate.format('YYYY-MM-DD')]);
+
+                var results = [];
+                query.on('row', function(row) {
+                    results.push(row);
+                });
+
+                // After all data is returned, close connection and return results
+                query.on('end', function() {
+                    // Pivot the data to group it by date and event name
+                    var prevDate = null;
+                    var rotaList = [];
+                    var currentDate = null;
+                    for (var i=0; i<results.length; i++) {
+                        var item = results[i];
+
+                        // Check if we've changed dates
+                        if (prevDate !== item.event_date_id) {
+                            // Save the list so far
+                            if (prevDate) {
+                                rotaList.push(currentDate);
+                            }
+
+                            // Start a new current date
+                            currentDate = {
+                                eventId: item.event_id,
+                                eventDate: item.on_date,
+                                isAway: item.is_away,
+                                eventName: item.event_name,
+                                roles:[]
+                            };
+                            prevDate = item.event_date_id;
+                        }
+
+                        // Add the current role to the list of roles for the date and event
+                        currentDate.roles.push(item.role_name);
+                    }
+
+                    // Handle the last record
+                    if (results.length > 0) {
+                        rotaList.push(currentDate);
+                    }
+
+                    client.end();
+                    return res.json({rota:rotaList});
+                });
+        });
     });
 
 

@@ -19,8 +19,8 @@ var Person = {
         }
     },
 
-    rota: function(personId) {
-        return $.get(this.url + '/' + personId + '/rota');
+    rota: function(personId, range) {
+        return $.post(this.url + '/' + personId + '/rota', {range: range});
     }
 
 };
