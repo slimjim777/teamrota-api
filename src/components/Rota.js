@@ -2,6 +2,11 @@ var React = require('react');
 var Person = require('../models/person');
 var moment = require('moment');
 
+var MESSAGES = [
+    'Nada, zilch, nothing to display.',
+    "Dude, you've got nothing to do!",
+    "So, your diary is free - want to meet for coffee?"];
+
 
 var Rota = React.createClass({
 
@@ -14,7 +19,8 @@ var Rota = React.createClass({
     },
 
     renderTable: function() {
-        var self = this;
+        var index = 0;
+        var indexRole = 0;
         if (this.props.rota.length > 0) {
             return (
                 <table className="table table-striped">
@@ -25,14 +31,16 @@ var Rota = React.createClass({
                     </thead>
                     <tbody>
                     {this.props.rota.map(function(rota) {
+                        index += 1;
                         return (
-                            <tr>
+                            <tr key={index}>
                                 <td>{moment(rota.eventDate).format('DD/MM/YYYY')}</td>
                                 <td>
                                     <a href="#">{rota.eventName}</a>
                                     <div>
                                         {rota.roles.map(function(role) {
-                                            return (<span className="label label-default">{role}</span>);
+                                            indexRole += 1;
+                                            return (<span className="label label-default" key={indexRole}>{role}</span>);
                                         })}
                                     </div>
                                 </td>
@@ -43,7 +51,7 @@ var Rota = React.createClass({
                 </table>
             );
         } else {
-            return <p>Nada, zilch, nothing to display.</p>;
+            return <p>{MESSAGES[Math.floor(Math.random() * MESSAGES.length)]}</p>;
         }
     },
 
@@ -54,8 +62,12 @@ var Rota = React.createClass({
                 <div className="panel-heading">
                     <h3 className="panel-title">
                         {this.renderSpinner()}Rota&nbsp;
-                        <button className="btn" onClick={this.props.rangeMinus}><span className="glyphicon glyphicon-arrow-left"></span></button>
-                        <button className="btn" onClick={this.props.rangePlus}><span className="glyphicon glyphicon-arrow-right"></span></button>
+                        <button className="btn" title="Previous weeks" onClick={this.props.rangeMinus}>
+                            <span className="glyphicon glyphicon-arrow-left"></span>
+                        </button>
+                        <button className="btn" title="Next weeks" onClick={this.props.rangePlus}>
+                            <span className="glyphicon glyphicon-arrow-right"></span>
+                        </button>
                         <button className="btn" title="Refresh Rota" onClick={this.props.rotaRefreshClick}>
                             <span className="glyphicon glyphicon-refresh"></span>
                         </button>

@@ -97,6 +97,11 @@ var React = require('react');
 var Person = require('../models/person');
 var moment = require('moment');
 
+var MESSAGES = [
+    'Nada, zilch, nothing to display.',
+    "Dude, you've got nothing to do!",
+    "So, your diary is free - want to meet for coffee?"];
+
 
 var Rota = React.createClass({displayName: "Rota",
 
@@ -110,6 +115,8 @@ var Rota = React.createClass({displayName: "Rota",
 
     renderTable: function() {
         var self = this;
+        var index = 0;
+        var indexRole = 0;
         if (this.props.rota.length > 0) {
             return (
                 React.createElement("table", {className: "table table-striped"}, 
@@ -120,14 +127,16 @@ var Rota = React.createClass({displayName: "Rota",
                     ), 
                     React.createElement("tbody", null, 
                     this.props.rota.map(function(rota) {
+                        index += 1;
                         return (
-                            React.createElement("tr", null, 
+                            React.createElement("tr", {key: index}, 
                                 React.createElement("td", null, moment(rota.eventDate).format('DD/MM/YYYY')), 
                                 React.createElement("td", null, 
                                     React.createElement("a", {href: "#"}, rota.eventName), 
                                     React.createElement("div", null, 
                                         rota.roles.map(function(role) {
-                                            return (React.createElement("span", {className: "label label-default"}, role));
+                                            indexRole += 1;
+                                            return (React.createElement("span", {className: "label label-default", key: indexRole}, role));
                                         })
                                     )
                                 )
@@ -138,7 +147,7 @@ var Rota = React.createClass({displayName: "Rota",
                 )
             );
         } else {
-            return React.createElement("p", null, "Nada, zilch, nothing to display.");
+            return React.createElement("p", null, MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
         }
     },
 
@@ -149,8 +158,12 @@ var Rota = React.createClass({displayName: "Rota",
                 React.createElement("div", {className: "panel-heading"}, 
                     React.createElement("h3", {className: "panel-title"}, 
                         this.renderSpinner(), "Rota ", 
-                        React.createElement("button", {className: "btn", onClick: this.props.rangeMinus}, React.createElement("span", {className: "glyphicon glyphicon-arrow-left"})), 
-                        React.createElement("button", {className: "btn", onClick: this.props.rangePlus}, React.createElement("span", {className: "glyphicon glyphicon-arrow-right"})), 
+                        React.createElement("button", {className: "btn", title: "Previous weeks", onClick: this.props.rangeMinus}, 
+                            React.createElement("span", {className: "glyphicon glyphicon-arrow-left"})
+                        ), 
+                        React.createElement("button", {className: "btn", title: "Next weeks", onClick: this.props.rangePlus}, 
+                            React.createElement("span", {className: "glyphicon glyphicon-arrow-right"})
+                        ), 
                         React.createElement("button", {className: "btn", title: "Refresh Rota", onClick: this.props.rotaRefreshClick}, 
                             React.createElement("span", {className: "glyphicon glyphicon-refresh"})
                         )
