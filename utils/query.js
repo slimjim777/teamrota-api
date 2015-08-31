@@ -19,6 +19,17 @@ var sql = {
                 "where p.id = $1 " +
                 "and ed.on_date between $2 and $3 " +
                 "order by ed.on_date, ev.name";
+    },
+
+    awayDateForPerson: function() {
+        // Parameters:
+        // 1: person.id
+        // 2: from_date
+        // 3: to_date
+        return "select * from away_date " +
+                "where person_id = $1 " +
+                "and from_date >= $2 " +
+                "and from_date < $3";
     }
 };
 

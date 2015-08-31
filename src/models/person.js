@@ -21,7 +21,12 @@ var Person = {
 
     rota: function(personId, range) {
         return $.post(this.url + '/' + personId + '/rota', {range: range});
+    },
+
+    awayDates: function(personId, range) {
+        return $.post(this.url + '/' + personId + '/away', {range: range});
     }
+
 
 };
 

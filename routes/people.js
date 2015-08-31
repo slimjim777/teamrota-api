@@ -8,6 +8,21 @@ var sql = require('../utils/query');
 var RANGE = 12;
 
 
+function datesFromRange(rangeParam) {
+    // Calculate the from and to dates
+    var range = parseInt(rangeParam);
+    var fromDate;
+    var toDate;
+    if (range > 0) {
+        fromDate = moment().add(range - RANGE, 'weeks');
+        toDate = moment().add(range, 'weeks');
+    } else {
+        fromDate = moment().add(range, 'weeks');
+        toDate = moment().add(range + RANGE, 'weeks');
+    }
+    return [fromDate, toDate];
+}
+
 router.route('/people')
     .get(apiAuthenticated, function(req, res) {
         res.json(PEOPLE);
@@ -55,16 +70,9 @@ router.route('/people/:id')
 router.route('/people/:id/rota')
     .post(apiAuthenticated, function(req, res) {
         // Calculate the from and to dates
-        var range = parseInt(req.body.range);
-        var fromDate;
-        var toDate;
-        if (range > 0) {
-            fromDate = moment().add(range - RANGE, 'weeks');
-            toDate = moment().add(range, 'weeks');
-        } else {
-            toDate = moment().add(range, 'weeks');
-            fromDate = moment().add(range - RANGE, 'weeks');
-        }
+        var dates = datesFromRange(req.body.range);
+        var fromDate = dates[0];
+        var toDate = dates[1];
 
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
             var query = client.query(
@@ -117,5 +125,33 @@ router.route('/people/:id/rota')
         });
     });
 
+router.route('/people/:id/away')
+    .post(apiAuthenticated, function(req, res) {
+        // Calculate the from and to dates
+        var dates = datesFromRange(req.body.range);
+        var fromDate = dates[0];
+        var toDate = dates[1];
+
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+            var query = client.query(
+                sql.awayDateForPerson(), [req.params.id, fromDate.format('YYYY-MM-DD'), toDate.format('YYYY-MM-DD')]);
+
+            var results = [];
+            query.on('row', function (row) {
+                results.push({
+                    id: row.id,
+                    personId: row.person_id,
+                    fromDate: row.from_date,
+                    toDate: row.to_date
+                });
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function () {
+                client.end();
+                return res.json({awayDates: results});
+            });
+        });
+    });
 
 module.exports = router;

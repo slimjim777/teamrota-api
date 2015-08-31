@@ -2,13 +2,8 @@ var React = require('react');
 var Person = require('../models/person');
 var moment = require('moment');
 
-var MESSAGES = [
-    'Nada, zilch, nothing to display.',
-    "Dude, you've got nothing to do!",
-    "So, your diary is free - want to meet for coffee?"];
 
-
-var Rota = React.createClass({
+var AwayDates = React.createClass({
 
     renderSpinner: function() {
         if (this.props.isLoading) {
@@ -19,31 +14,22 @@ var Rota = React.createClass({
     },
 
     renderTable: function() {
-        var index = 0;
-        var indexRole = 0;
-        if (this.props.rota.length > 0) {
+        if (this.props.awayDates.length > 0) {
             return (
                 <table className="table table-striped">
                     <thead>
                     <tr>
-                        <th>Date</th><th>Event</th>
+                        <th></th><th>From Date</th><th>To Date</th><th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    {this.props.rota.map(function(rota) {
-                        index += 1;
+                    {this.props.awayDates.map(function(away) {
                         return (
-                            <tr key={index}>
-                                <td>{moment(rota.eventDate).format('DD/MM/YYYY')}</td>
-                                <td>
-                                    <a href="#">{rota.eventName}</a>
-                                    <div>
-                                        {rota.roles.map(function(role) {
-                                            indexRole += 1;
-                                            return (<span className="label label-default" key={indexRole}>{role}</span>);
-                                        })}
-                                    </div>
-                                </td>
+                            <tr key={away.id}>
+                                <td><button className="btn btn-default">Edit</button></td>
+                                <td>{moment(away.fromDate).format('DD/MM/YYYY')}</td>
+                                <td>{moment(away.toDate).format('DD/MM/YYYY')}</td>
+                                <td><button className="btn btn-link"><span className="glyphicon glyphicon-remove-circle"></span></button></td>
                             </tr>
                         );
                     })}
@@ -51,24 +37,23 @@ var Rota = React.createClass({
                 </table>
             );
         } else {
-            return <p>{MESSAGES[Math.floor(Math.random() * MESSAGES.length)]}</p>;
+            return <p>No away dates found.</p>;
         }
     },
 
     render: function () {
-
         return (
             <div className="panel panel-default">
                 <div className="panel-heading">
                     <h3 className="panel-title">
-                        {this.renderSpinner()}Rota&nbsp;
+                        {this.renderSpinner()}Away Dates&nbsp;
                         <button className="btn" title="Previous weeks" onClick={this.props.rangeMinus}>
                             <span className="glyphicon glyphicon-arrow-left"></span>
                         </button>
                         <button className="btn" title="Next weeks" onClick={this.props.rangePlus}>
                             <span className="glyphicon glyphicon-arrow-right"></span>
                         </button>
-                        <button className="btn" title="Refresh Rota" onClick={this.props.rotaRefreshClick}>
+                        <button className="btn" title="Refresh Rota" onClick={this.props.awayRefreshClick}>
                             <span className="glyphicon glyphicon-refresh"></span>
                         </button>
                     </h3>
@@ -80,7 +65,6 @@ var Rota = React.createClass({
             </div>
         );
     }
-
 });
 
-module.exports = Rota;
+module.exports = AwayDates;
