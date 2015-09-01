@@ -4,7 +4,6 @@ var $ = require('jquery');
 
 var Person = {
     url: '/api/people',
-    USERID: '1',
 
     me: function() {
         return $.get(this.url + '/permissions');

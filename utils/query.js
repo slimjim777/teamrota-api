@@ -30,6 +30,10 @@ var sql = {
                 "where person_id = $1 " +
                 "and from_date >= $2 " +
                 "and from_date < $3";
+    },
+
+    events: function() {
+        return "select * from event where active order by name";
     }
 };
 
