@@ -25,4 +25,52 @@ router.route('/events')
         });
     });
 
+router.route('/events/:id')
+    .get(apiAuthenticated, function(req, res) {
+        var eventId = parseInt(req.params.id);
+
+        // Get a Postgres client from the connection pool
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+            var query = client.query(sql.eventDetail(), [eventId]);
+
+            var results = [];
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                var model = {};
+                if (results.length > 0) {
+                    model = results[0];
+                }
+
+                client.end();
+                return res.json({model: model});
+            });
+        });
+    });
+
+router.route('/events/:id/dates')
+    .get(apiAuthenticated, function(req, res) {
+        var eventId = parseInt(req.params.id);
+
+        // Get a Postgres client from the connection pool
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+            var fromDate = moment().format('YYYY-MM-DD');
+            var query = client.query(sql.eventDates(), [eventId, fromDate]);
+
+            var results = [];
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json({dates: results});
+            });
+        });
+    });
+
 module.exports = router;

@@ -34,6 +34,61 @@ var sql = {
 
     events: function() {
         return "select * from event where active order by name";
+    },
+
+    eventDetail: function() {
+        return "select * from event where id=$1";
+    },
+
+    eventDates: function() {
+        // Parameters:
+        // 1: event.id
+        // 2: on_date
+        return "select * from event_date " +
+               "where event_id = $1 and on_date >= $2 " +
+               "order by on_date limit 12";
+    },
+
+    eventDate: function() {
+        // Parameters:
+        // 1: eventdate.id
+        return "select * from event_date where id = $1";
+    },
+
+    eventDateRota: function() {
+        // Parameters:
+        // 1: eventdate.id
+        return "select ev.name event_name, ev.id event_id, on_date, " +
+                "role.name role_name, firstname, lastname, role.id role_id, " +
+                "    ed.id event_date_id, p.active person_active, p.id person_id, " +
+                "    exists(select 1 from away_date where person_id=p.id " +
+                "and on_date between from_date and to_date) is_away, " +
+                "    ed.focus, ed.notes, " +
+                "    exists(select 1 from rota rr " +
+                "inner join event_date eded on rr.event_date_id=eded.id " +
+                "where rr.person_id=p.id " +
+                "and eded.id<>ed.id " +
+                "and eded.on_date=ed.on_date) on_rota " +
+                "from rota r " +
+                "inner join event_date ed on r.event_date_id=ed.id " +
+                "inner join event ev on ed.event_id=ev.id " +
+                "inner join person p on r.person_id=p.id " +
+                "inner join role on role.id = r.role_id " +
+                "where ed.id = $1 " +
+                "order by role.sequence";
+    },
+
+    eventDateRoles: function() {
+        return "select r.id role_id, r.sequence, r.name role_name, firstname, lastname, " +
+                "p.active person_active, p.id person_id, on_date, " +
+                "    exists(select 1 from away_date where person_id=p.id " +
+                "and on_date between from_date and to_date) is_away " +
+                "from role r " +
+                "left outer join role_people rp on rp.role_id=r.id " +
+                "left outer join person p on p.id=rp.person_id " +
+                "inner join event_date ed on r.event_id=ed.event_id and " +
+                "ed.id = $1 " +
+                "order by sequence, r.id";
     }
 };
 

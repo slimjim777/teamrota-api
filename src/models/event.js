@@ -7,6 +7,14 @@ var Event = {
 
     all: function () {
         return $.get(this.url);
+    },
+
+    findById: function(modelId) {
+        return $.get(this.url + '/' + modelId);
+    },
+
+    dates: function(modelId) {
+        return $.get(this.url + '/' + modelId + '/dates');
     }
 };
 

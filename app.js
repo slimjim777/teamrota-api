@@ -98,12 +98,14 @@ var rota = require('./routes/rota');
 var users = require('./routes/users');
 var people = require('./routes/people');
 var events = require('./routes/events');
+var eventdates = require('./routes/eventdates');
 
 app.use('/', routes);
 app.use('/rota', rota);
 app.use('/users', users);
 app.use('/api', people);
 app.use('/api', events);
+app.use('/api', eventdates);
 
 app.get('/login', function(req, res){
     res.render('login', { user: req.user });

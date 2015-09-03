@@ -6,6 +6,7 @@ var DefaultRoute = Router.DefaultRoute;
 var MyRota = require('./components/MyRota');
 var People = require('./components/People');
 var Events = require('./components/Events');
+var EventDetail = require('./components/EventDetail');
 
 var Navbar = require('react-bootstrap').Navbar;
 var Nav = require('react-bootstrap').Nav;
@@ -39,7 +40,9 @@ var routes = (
         <DefaultRoute handler={MyRota} />
         <Route path="me" handler={MyRota}/>
         <Route path="people" handler={People}/>
-        <Route path="events" handler={Events}/>
+        <Route path="events" handler={Events} />
+        <Route path="events/:id" handler={EventDetail} />
+        <Route path="events/:id/:dateId" handler={EventDetail} />
     </Route>
 );
 

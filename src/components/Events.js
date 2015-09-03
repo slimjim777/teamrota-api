@@ -14,13 +14,6 @@ var Events = React.createClass({
 
         // Get the events
         self.getEvents();
-
-        var result = Event.all();
-        result.done(function(data) {
-            console.log(data);
-            self.setState({ events: data.events });
-            self.forceUpdate();
-        });
     },
 
     getEvents: function() {

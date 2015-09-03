@@ -151,8 +151,9 @@ table.rota {
  	color: white;
  }
  .btn.active {
- 	-webkit-box-shadow: none;
- 	box-shadow: none;
+     -webkit-box-shadow: none;
+     box-shadow: none;
+     background-color: #a5bfb2;
  }
 
  .btn-danger {

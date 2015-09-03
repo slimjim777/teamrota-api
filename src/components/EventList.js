@@ -19,8 +19,8 @@ var EventList = React.createClass({
                         <tbody>
                         {this.props.events.map(function(ev) {
                             return (
-                                <tr>
-                                    <td>{ev.name}</td><td>Overview</td>
+                                <tr key={ev.id}>
+                                    <td><a href={'#/events/' + ev.id}>{ev.name}</a></td><td>Overview</td>
                                 </tr>
                             );
                         })}
