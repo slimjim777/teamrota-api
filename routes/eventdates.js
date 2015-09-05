@@ -116,10 +116,106 @@ router.route('/eventdates/:id')
                 }
                 return prev;
             }, {});
-            eventDate.roles = roles;
+
+            // Convert to an array
+            var roleArray = [];
+            for (var prop in roles) {
+                if (roles.hasOwnProperty(prop)) {
+                    var roleList = roles[prop];
+                    var roleName = '';
+                    var roleId = null;
+                    if (roleList.length > 0) {
+                        roleName = roleList[0].role_name;
+                        roleId = roleList[0].role_id;
+                    }
+
+                    // Find the person in the rota for the role
+                    var personId = null;
+                    for (var i=0; i < results.rota.length; i++) {
+                        var rota = results.rota[i];
+                        if (rota.role_id == roleId) {
+                            personId = rota.person_id;
+                            break;
+                        }
+                    }
+
+                    // Reformat the role info for display
+                    var roleRota = {
+                        roleId: roleId,
+                        roleName: roleName,
+                        roles: roleList,
+                        personId: personId
+                    };
+                    roleArray.push(roleRota);
+                }
+            }
+            eventDate.roles = roleArray;
 
             return res.json(eventDate);
         });
     });
+
+router.route('/eventdates/:id/rota')
+    .post(apiAuthenticated, function(req, res) {
+        console.log('post');
+        var eventDateId = parseInt(req.params.id);
+        var rolePerson = req.body;
+
+        // Iterate the role-person pairs
+        for (var roleId in rolePerson) {
+            // An id of 0 means we're deselecting the person for the role
+            var personId = parseInt(rolePerson[roleId]);
+
+            async.waterfall([
+                function (callback) {
+                    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+                        // Look for a role entry for this person
+                        var query = client.query(sql.rotaForRole(), [eventDateId, roleId]);
+
+                        var results = [];
+                        query.on('row', function(row) {
+                            results.push(row);
+                        });
+
+                        // After all data is returned, close connection and return results
+                        query.on('end', function() {
+                            client.end();
+                            callback(null, results);
+                        });
+
+                    });
+                }
+
+            ], function (err, results) {
+                var query = null;
+                pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+                    if (results.length == 0) {
+                        // Not found: add a new rota record
+                        if (personId > 0) {
+                            query = client.query(sql.addRotaForRole(), [eventDateId, parseInt(roleId), personId]);
+                        }
+                    } else {
+                        var record = results[0];
+                        if (personId > 0) {
+                            // Update the person
+                            query = client.query(sql.updateRotaForRole(), [parseInt(record.id), personId]);
+                        } else {
+                            // Delete for 0-id
+                            query = client.query(sql.deleteRotaForPerson(), [parseInt(record.id)]);
+                        }
+                    }
+
+                    // After all data is returned, close connection and return results
+                    if (query) {
+                        query.on('end', function () {
+                            client.end();
+                        });
+                    }
+                });
+            });
+        }
+        res.json({result: 'done'});
+    });
+
 
 module.exports = router;

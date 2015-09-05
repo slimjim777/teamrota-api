@@ -5,29 +5,25 @@ var moment = require('moment');
 var EventDetailRota = React.createClass({
 
     renderActions: function() {
-        if (this.props.isEditing) {
+        if (this.props.canAdministrate) {
             return (
                 <span>
-                <button className="btn btn-primary">Save</button> &nbsp;
-                <button className="btn btn-default">Cancel</button>
+                    <button className="btn btn-primary" onClick={this.props.toggleEdit}>Edit</button>&nbsp;
+                    <button className="btn btn-default" title = "Delete" ><span className="glyphicon glyphicon-remove"></span></button>
                 </span>
             );
-        } else {
-            if (this.props.canAdministrate) {
-                return (
-                    <span>
-                        <button className="btn btn-primary">Edit</button>
-                        <button className="btn btn-default" title = "Delete" ><span className="glyphicon glyphicon-remove"></span></button >
-                    </span>
-                );
-            }
         }
     },
 
     render: function () {
-        var model = this.props.model;
         var summary = this.props.summary;
         var rota = this.props.rota;
+
+        if (!this.props.dateId) {
+            return (
+                <div>Select a date to display the rota.</div>
+            );
+        }
 
         return (
             <div className="col-md-8 col-sm-8 col-xs-12">

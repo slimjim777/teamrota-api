@@ -1,6 +1,16 @@
 
 var sql = {
 
+    permissions: function () {
+        // Parameters:
+        // 1: person.id
+        return "select e.id event_id, e.name event_name " +
+               "from person p " +
+               "inner join event_admins ad on ad.person_id=p.id " +
+               "inner join event e on e.id=ad.event_id " +
+               "where person_id = $1";
+    },
+
     rotaForPerson: function() {
         // Parameters:
         // 1: person.id
@@ -89,7 +99,30 @@ var sql = {
                 "inner join event_date ed on r.event_id=ed.event_id and " +
                 "ed.id = $1 " +
                 "order by sequence, r.id";
+    },
+
+    rotaForRole: function() {
+        // Parameters:
+        // 1: eventdate.id
+        // 2: role_id
+        return "select * from rota where event_date_id=$1 and role_id=$2";
+    },
+
+    addRotaForRole: function() {
+        return "insert into rota (event_date_id, role_id, person_id) values ($1, $2, $3)";
+    },
+
+    updateRotaForRole: function() {
+        // Parameters:
+        // 1: rota.id
+        // 2: person_id
+        return "update rota set person_id=$2 where id=$1";
+    },
+
+    deleteRotaForPerson: function() {
+        return "delete from rota where id=$1";
     }
+
 };
 
 module.exports = sql;

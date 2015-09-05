@@ -33,7 +33,7 @@ router.route('/people')
 
 router.route('/people/permissions')
     .get(apiAuthenticated, function(req, res) {
-        res.json(req.session);
+        res.json(req.session.user);
     });
 
 router.route('/people/me')
@@ -42,7 +42,7 @@ router.route('/people/me')
         // Get a Postgres client from the connection pool
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 
-            var query = client.query("SELECT * FROM person WHERE id=($1)", [req.session.userId]);
+            var query = client.query("SELECT * FROM person WHERE id=($1)", [req.session.user.userId]);
 
             var results = [];
             query.on('row', function(row) {

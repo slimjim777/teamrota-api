@@ -11,6 +11,7 @@ var session = require('express-session');
 var pg = require('pg');
 var pgSession = require('connect-pg-simple')(session);
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var authenticate = require('./utils/utils').authenticate;
 
 var SESSION_MAX_AGE = 86400000;
 
@@ -32,35 +33,9 @@ passport.use(new GoogleStrategy({
         clientSecret: process.env.CLIENT_SECRET
     },
     function(request, accessToken, refreshToken, profile, done) {
-        console.log('---------------------session');
-        var records = [];
-        // Get details from the database
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-            var query = client.query("SELECT * FROM person WHERE email = $1", [profile.email]);
-
-            query.on('row', function(row) {
-                records.push(row);
-            });
-
-            // After all data is returned, close connection and return results
-            query.on('end', function() {
-                if (records.length > 0) {
-                    request.session.userId = records[0].id;
-                    request.session.email = profile.email;
-                    request.session.name = profile.displayName;
-                    console.log(request.session);
-                } else {
-                    // TODO: redirect to the error page
-                    request.session = null;
-                    console.log('User not found');
-                }
-                request.session.save(function() {
-                    client.end();
-                });
-
-            });
-
-        });
+        console.log('---------------------session authenticate');
+        // Authenticate the user against the database and get permissions
+        authenticate(request, profile);
 
         return done(null, profile);
     }

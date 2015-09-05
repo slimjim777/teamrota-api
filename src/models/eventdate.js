@@ -7,6 +7,11 @@ var EventDate = {
 
     findById: function(modelId) {
         return $.get(this.url + '/' + modelId);
+    },
+
+    updateRota: function(modelId, rolePerson) {
+        // Expecting dictionary: {role_id: person_id}
+        return $.post(this.url + '/' + modelId + '/rota', rolePerson);
     }
 };
 
