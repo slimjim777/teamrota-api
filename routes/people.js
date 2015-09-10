@@ -1,3 +1,4 @@
+'use strict';
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
@@ -25,7 +26,22 @@ function datesFromRange(rangeParam) {
 
 router.route('/people')
     .get(apiAuthenticated, function(req, res) {
-        res.err(new Error('GET Not implemented'));
+
+        // Get a Postgres client from the connection pool
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+            var query = client.query("SELECT * FROM person order by lastname, firstname");
+
+            var results = [];
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json({people: results});
+            });
+        });
     })
     .post(apiAuthenticated, function(req, res) {
         res.err(new Error('POST Not implemented'));
@@ -103,6 +119,7 @@ router.route('/people/:id/rota')
                             currentDate = {
                                 eventId: item.event_id,
                                 eventDate: item.on_date,
+                                eventDateId: item.event_date_id,
                                 isAway: item.is_away,
                                 eventName: item.event_name,
                                 roles:[]

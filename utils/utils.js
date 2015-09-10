@@ -1,3 +1,4 @@
+'use strict';
 var pg = require('pg');
 var async = require('async');
 var sql = require('../utils/query');
@@ -80,6 +81,25 @@ var utils = {
                         });
                     });
                 });
+            },
+
+            // Third, update the last login of the user
+            function(request, user, callback) {
+                if (!user) {
+                    callback('User not found', null);
+                }
+
+                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                    var query = client.query(sql.updateLastLogin(), [user.userId]);
+
+                    // After all data is returned, close connection and return results
+                    query.on('end', function() {
+                            client.end();
+                            callback(null, request, user);
+
+                    });
+                });
+
             }
 
         ], function(err, request, user) {

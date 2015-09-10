@@ -1,5 +1,6 @@
+'use strict';
 var React = require('react');
-var Event = require('../models/event');
+var EventModel = require('../models/event');
 var EventList = require('../components/EventList');
 
 
@@ -19,7 +20,7 @@ var Events = React.createClass({
     getEvents: function() {
         var self = this;
         self.setState({eventsLoading: true});
-        var result = Event.all();
+        var result = EventModel.all();
         result.done(function(data) {
             self.setState({ events: data.events, eventsLoading: false });
         });

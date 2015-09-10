@@ -1,3 +1,4 @@
+'use strict';
 var React = require('react');
 var Person = require('../models/person');
 var Rota = require('../components/Rota');

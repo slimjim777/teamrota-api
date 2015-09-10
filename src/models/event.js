@@ -1,8 +1,9 @@
+'use strict';
 var request = require('request');
 var $ = require('jquery');
 
 
-var Event = {
+var EventModel = {
     url: '/api/events',
 
     all: function () {
@@ -18,4 +19,4 @@ var Event = {
     }
 };
 
-module.exports = Event;
+module.exports = EventModel;

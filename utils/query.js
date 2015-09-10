@@ -1,3 +1,4 @@
+'use strict';
 
 var sql = {
 
@@ -9,6 +10,10 @@ var sql = {
                "inner join event_admins ad on ad.person_id=p.id " +
                "inner join event e on e.id=ad.event_id " +
                "where person_id = $1";
+    },
+
+    updateLastLogin: function() {
+        return "update person set last_login=now() where id=$1";
     },
 
     rotaForPerson: function() {

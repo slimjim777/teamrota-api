@@ -32,11 +32,12 @@ var Rota = React.createClass({
                     <tbody>
                     {this.props.rota.map(function(rota) {
                         index += 1;
+                        var eventLink = '#/events/' + rota.eventId + '/' + rota.eventDateId;
                         return (
                             <tr key={index}>
                                 <td>{moment(rota.eventDate).format('DD/MM/YYYY')}</td>
                                 <td>
-                                    <a href="#">{rota.eventName}</a>
+                                    <a href={eventLink}>{rota.eventName}</a>
                                     <div>
                                         {rota.roles.map(function(role) {
                                             indexRole += 1;

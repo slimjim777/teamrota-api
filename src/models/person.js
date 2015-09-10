@@ -1,3 +1,4 @@
+'use strict';
 var request = require('request');
 var $ = require('jquery');
 
@@ -7,6 +8,10 @@ var Person = {
 
     permissions: function() {
         return $.get(this.url + '/permissions');
+    },
+
+    all: function () {
+        return $.get(this.url);
     },
 
     findById: function(personId) {
@@ -25,8 +30,6 @@ var Person = {
     awayDates: function(personId, range) {
         return $.post(this.url + '/' + personId + '/away', {range: range});
     }
-
-
 };
 
 module.exports = Person;
