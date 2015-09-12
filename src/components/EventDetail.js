@@ -1,3 +1,4 @@
+'use strict';
 var React = require('react');
 var Router = require('react-router');
 var Event = require('../models/event');
@@ -119,7 +120,7 @@ var EventDetail = React.createClass({
             return (
                 <EventDetailRotaEdit dateId={this.state.dateId} summary={this.state.dateSummary} rota={this.state.rota}
                                  canAdministrate={this.canAdministrate()} refreshData={this.refreshData}
-                                 roles={this.state.roles} />
+                                     toggleEdit={this.handleToggleEdit} roles={this.state.roles} />
             );
         } else {
             return (

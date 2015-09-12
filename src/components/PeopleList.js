@@ -32,7 +32,7 @@ var PeopleList = React.createClass({
                         {this.props.people.map(function(p) {
                             return (
                                 <tr key={p.id}>
-                                    <td><a href={'#/people/' + p.id}>{p.firstname} {p.lastname}</a></td>
+                                    <td><a href={'#/person/' + p.id}>{p.firstname} {p.lastname}</a></td>
                                     <td>{self.renderActive(p.active)}</td>
                                     <td>{self.renderActive(p.guest)}</td>
                                     <td>{p.last_login ? moment(p.last_login).format('DD/MM/YYYY HH:mm') : ''}</td>

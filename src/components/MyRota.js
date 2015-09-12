@@ -18,8 +18,11 @@ var MyRota = React.createClass({
     componentDidMount: function () {
         var self = this;
 
+        // Get the person ID if this was called for someone other than 'me'
+        var personId = this.props.params.id;
+
         // Get the person details
-        var result = Person.findById();
+        var result = Person.findById(personId);
         result.done(function(data) {
             self.setState({ person: data });
             self.getRota(data.id, RANGE);
@@ -54,7 +57,7 @@ var MyRota = React.createClass({
     rotaRangePlus: function(e) {
         e.preventDefault();
         var range = this.state.rotaRange + RANGE;
-        if (range === 0) {range = RANGE}
+        if (range === 0) {range = RANGE;}
         this.setState({rotaRange: range});
         this.getRota(this.state.person.id, range);
     },
@@ -62,7 +65,7 @@ var MyRota = React.createClass({
     rotaRangeMinus: function(e) {
         e.preventDefault();
         var range = this.state.rotaRange - RANGE;
-        if (range === 0) {range = -RANGE}
+        if (range === 0) {range = -RANGE;}
         this.setState({rotaRange: range});
         this.getRota(this.state.person.id, range);
     },
@@ -75,7 +78,7 @@ var MyRota = React.createClass({
     awayRangePlus: function (e) {
         e.preventDefault();
         var range = this.state.awayRange + RANGE;
-        if (range === 0) {range = RANGE}
+        if (range === 0) {range = RANGE;}
         this.setState({awayRange: range});
         this.getAwayDates(this.state.person.id, range);
     },
@@ -83,13 +86,13 @@ var MyRota = React.createClass({
     awayRangeMinus: function (e) {
         e.preventDefault();
         var range = this.state.awayRange - RANGE;
-        if (range === 0) {range = -RANGE}
+        if (range === 0) {range = -RANGE;}
         this.setState({awayRange: range});
         this.getAwayDates(this.state.person.id, range);
     },
 
     rotaRangeMessage: function () {
-        if (this.state.rotaRange == RANGE) {return}
+        if (this.state.rotaRange === RANGE) {return;}
         if (this.state.rotaRange > 0) {
             return 'Next ' + (this.state.rotaRange - RANGE) + ' to ' + this.state.rotaRange + ' weeks';
         } else {
@@ -98,7 +101,7 @@ var MyRota = React.createClass({
     },
 
     awayRangeMessage: function () {
-        if (this.state.awayRange == RANGE) {return}
+        if (this.state.awayRange === RANGE) {return;}
         if (this.state.awayRange > 0) {
             return 'Next ' + (this.state.awayRange - RANGE) + ' to ' + this.state.awayRange + ' weeks';
         } else {

@@ -75,12 +75,24 @@ router.route('/people/me')
 
 router.route('/people/:id')
     .get(apiAuthenticated, function(req, res) {
-        var index = parseInt(req.params.id) - 1;
-        if (index >= PEOPLE.length) {
-            index = 4;
-        }
-        var person = PEOPLE[index];
-        res.json(person);
+        var personId = parseInt(req.params.id);
+
+        // Get a Postgres client from the connection pool
+        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+
+            var query = client.query("SELECT * FROM person WHERE id=($1)", [personId]);
+
+            var results = [];
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json(results[0]);
+            });
+        });
     });
 
 router.route('/people/:id/rota')

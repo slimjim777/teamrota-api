@@ -1,3 +1,4 @@
+'use strict';
 var React = require('react');
 var Router = require('react-router');
 var Route = Router.Route;
@@ -39,6 +40,7 @@ var routes = (
     <Route handler={App}>
         <DefaultRoute handler={MyRota} />
         <Route path="me" handler={MyRota}/>
+        <Route path="person/:id" handler={MyRota}/>
         <Route path="people" handler={People}/>
         <Route path="events" handler={Events} />
         <Route path="events/:id" handler={EventDetail} />

@@ -70,6 +70,7 @@ var AwayDates = React.createClass({displayName: "AwayDates",
 
 module.exports = AwayDates;
 },{"../models/person":16,"moment":68,"react":"CwoHg3"}],2:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var Router = require('react-router');
 var Event = require('../models/event');
@@ -191,7 +192,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
             return (
                 React.createElement(EventDetailRotaEdit, {dateId: this.state.dateId, summary: this.state.dateSummary, rota: this.state.rota, 
                                  canAdministrate: this.canAdministrate(), refreshData: this.refreshData, 
-                                 roles: this.state.roles})
+                                     toggleEdit: this.handleToggleEdit, roles: this.state.roles})
             );
         } else {
             return (
@@ -372,6 +373,7 @@ var EventDetailPanel = React.createClass({displayName: "EventDetailPanel",
 
 module.exports = EventDetailPanel;
 },{"../models/event":14,"moment":68,"react":"CwoHg3"}],5:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var moment = require('moment');
 
@@ -444,6 +446,7 @@ var EventDetailRota = React.createClass({displayName: "EventDetailRota",
 
 module.exports = EventDetailRota;
 },{"moment":68,"react":"CwoHg3"}],6:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var moment = require('moment');
 var EventDate = require('../models/eventdate');
@@ -656,8 +659,11 @@ var MyRota = React.createClass({displayName: "MyRota",
     componentDidMount: function () {
         var self = this;
 
+        // Get the person ID if this was called for someone other than 'me'
+        var personId = this.props.params.id;
+
         // Get the person details
-        var result = Person.findById();
+        var result = Person.findById(personId);
         result.done(function(data) {
             self.setState({ person: data });
             self.getRota(data.id, RANGE);
@@ -692,7 +698,7 @@ var MyRota = React.createClass({displayName: "MyRota",
     rotaRangePlus: function(e) {
         e.preventDefault();
         var range = this.state.rotaRange + RANGE;
-        if (range === 0) {range = RANGE}
+        if (range === 0) {range = RANGE;}
         this.setState({rotaRange: range});
         this.getRota(this.state.person.id, range);
     },
@@ -700,7 +706,7 @@ var MyRota = React.createClass({displayName: "MyRota",
     rotaRangeMinus: function(e) {
         e.preventDefault();
         var range = this.state.rotaRange - RANGE;
-        if (range === 0) {range = -RANGE}
+        if (range === 0) {range = -RANGE;}
         this.setState({rotaRange: range});
         this.getRota(this.state.person.id, range);
     },
@@ -713,7 +719,7 @@ var MyRota = React.createClass({displayName: "MyRota",
     awayRangePlus: function (e) {
         e.preventDefault();
         var range = this.state.awayRange + RANGE;
-        if (range === 0) {range = RANGE}
+        if (range === 0) {range = RANGE;}
         this.setState({awayRange: range});
         this.getAwayDates(this.state.person.id, range);
     },
@@ -721,13 +727,13 @@ var MyRota = React.createClass({displayName: "MyRota",
     awayRangeMinus: function (e) {
         e.preventDefault();
         var range = this.state.awayRange - RANGE;
-        if (range === 0) {range = -RANGE}
+        if (range === 0) {range = -RANGE;}
         this.setState({awayRange: range});
         this.getAwayDates(this.state.person.id, range);
     },
 
     rotaRangeMessage: function () {
-        if (this.state.rotaRange == RANGE) {return}
+        if (this.state.rotaRange === RANGE) {return;}
         if (this.state.rotaRange > 0) {
             return 'Next ' + (this.state.rotaRange - RANGE) + ' to ' + this.state.rotaRange + ' weeks';
         } else {
@@ -736,7 +742,7 @@ var MyRota = React.createClass({displayName: "MyRota",
     },
 
     awayRangeMessage: function () {
-        if (this.state.awayRange == RANGE) {return}
+        if (this.state.awayRange === RANGE) {return;}
         if (this.state.awayRange > 0) {
             return 'Next ' + (this.state.awayRange - RANGE) + ' to ' + this.state.awayRange + ' weeks';
         } else {
@@ -840,7 +846,7 @@ var PeopleList = React.createClass({displayName: "PeopleList",
                         this.props.people.map(function(p) {
                             return (
                                 React.createElement("tr", {key: p.id}, 
-                                    React.createElement("td", null, React.createElement("a", {href: '#/people/' + p.id}, p.firstname, " ", p.lastname)), 
+                                    React.createElement("td", null, React.createElement("a", {href: '#/person/' + p.id}, p.firstname, " ", p.lastname)), 
                                     React.createElement("td", null, self.renderActive(p.active)), 
                                     React.createElement("td", null, self.renderActive(p.guest)), 
                                     React.createElement("td", null, p.last_login ? moment(p.last_login).format('DD/MM/YYYY HH:mm') : '')
@@ -945,6 +951,7 @@ var Rota = React.createClass({displayName: "Rota",
 
 module.exports = Rota;
 },{"../models/person":16,"moment":68,"react":"CwoHg3"}],13:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var Router = require('react-router');
 var Route = Router.Route;
@@ -986,6 +993,7 @@ var routes = (
     React.createElement(Route, {handler: App}, 
         React.createElement(DefaultRoute, {handler: MyRota}), 
         React.createElement(Route, {path: "me", handler: MyRota}), 
+        React.createElement(Route, {path: "person/:id", handler: MyRota}), 
         React.createElement(Route, {path: "people", handler: People}), 
         React.createElement(Route, {path: "events", handler: Events}), 
         React.createElement(Route, {path: "events/:id", handler: EventDetail}), 
