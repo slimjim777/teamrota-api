@@ -26,6 +26,7 @@ var EventDetailRota = React.createClass({
             );
         }
 
+        var index = 0;
         return (
             <div className="col-md-8 col-sm-8 col-xs-12">
                 <div className="panel panel-default">
@@ -51,8 +52,9 @@ var EventDetailRota = React.createClass({
                             </thead>
                             <tbody>
                             {rota.map(function(r) {
+                                index += 1;
                                 return (
-                                    <tr key={r.role_name}>
+                                    <tr key={index}>
                                         <td>{r.role_name}</td>
                                         <td>
                                             <a href="#/people/">{r.firstname} {r.lastname}</a>

@@ -401,6 +401,7 @@ var EventDetailRota = React.createClass({displayName: "EventDetailRota",
             );
         }
 
+        var index = 0;
         return (
             React.createElement("div", {className: "col-md-8 col-sm-8 col-xs-12"}, 
                 React.createElement("div", {className: "panel panel-default"}, 
@@ -426,8 +427,9 @@ var EventDetailRota = React.createClass({displayName: "EventDetailRota",
                             ), 
                             React.createElement("tbody", null, 
                             rota.map(function(r) {
+                                index += 1;
                                 return (
-                                    React.createElement("tr", {key: r.role_name}, 
+                                    React.createElement("tr", {key: index}, 
                                         React.createElement("td", null, r.role_name), 
                                         React.createElement("td", null, 
                                             React.createElement("a", {href: "#/people/"}, r.firstname, " ", r.lastname)
