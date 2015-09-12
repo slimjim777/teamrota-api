@@ -13,7 +13,10 @@ var Navbar = require('react-bootstrap').Navbar;
 var Nav = require('react-bootstrap').Nav;
 var CollapsibleNav = require('react-bootstrap').CollapsibleNav;
 var NavItem = require('react-bootstrap').NavItem;
+var Token = require('./models/Token');
 
+// Get the API token and store in the browser session storage
+Token.get();
 
 var App = React.createClass({
     render: function() {

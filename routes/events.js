@@ -1,13 +1,13 @@
+'use strict';
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
 var moment = require('moment');
-var apiAuthenticated = require('../utils/utils').apiAuthenticated;
 var sql = require('../utils/query');
 
 
 router.route('/events')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         // Get a Postgres client from the connection pool
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
             var query = client.query(sql.events());
@@ -26,7 +26,7 @@ router.route('/events')
     });
 
 router.route('/events/:id')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         var eventId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool
@@ -52,7 +52,7 @@ router.route('/events/:id')
     });
 
 router.route('/events/:id/dates')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         var eventId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool

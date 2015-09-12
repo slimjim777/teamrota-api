@@ -1,9 +1,9 @@
+'use strict';
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
 var async = require('async');
 var moment = require('moment');
-var apiAuthenticated = require('../utils/utils').apiAuthenticated;
 var sql = require('../utils/query');
 
 
@@ -44,7 +44,7 @@ var eventDateRota = function(dateId) {
 };
 
 router.route('/eventdates/:id')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         var dateId = parseInt(req.params.id);
 
         async.parallel({
@@ -156,8 +156,7 @@ router.route('/eventdates/:id')
     });
 
 router.route('/eventdates/:id/rota')
-    .post(apiAuthenticated, function(req, res) {
-        console.log('post');
+    .post(function(req, res) {
         var eventDateId = parseInt(req.params.id);
         var rolePerson = req.body;
 

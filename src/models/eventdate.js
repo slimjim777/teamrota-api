@@ -1,17 +1,17 @@
-var request = require('request');
-var $ = require('jquery');
+'use strict';
+var Ajax = require('./Ajax');
 
 
 var EventDate = {
     url: '/api/eventdates',
 
     findById: function(modelId) {
-        return $.get(this.url + '/' + modelId);
+        return Ajax.get(this.url + '/' + modelId);
     },
 
     updateRota: function(modelId, rolePerson) {
         // Expecting dictionary: {role_id: person_id}
-        return $.post(this.url + '/' + modelId + '/rota', rolePerson);
+        return Ajax.post(this.url + '/' + modelId + '/rota', rolePerson);
     }
 };
 

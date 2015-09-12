@@ -1,21 +1,20 @@
 'use strict';
-var request = require('request');
-var $ = require('jquery');
+var Ajax = require('./Ajax');
 
 
 var EventModel = {
     url: '/api/events',
 
     all: function () {
-        return $.get(this.url);
+        return Ajax.get(this.url);
     },
 
     findById: function(modelId) {
-        return $.get(this.url + '/' + modelId);
+        return Ajax.get(this.url + '/' + modelId);
     },
 
     dates: function(modelId) {
-        return $.get(this.url + '/' + modelId + '/dates');
+        return Ajax.get(this.url + '/' + modelId + '/dates');
     }
 };
 

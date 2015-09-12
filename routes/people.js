@@ -3,7 +3,6 @@ var express = require('express');
 var router = express.Router();
 var pg = require('pg');
 var moment = require('moment');
-var apiAuthenticated = require('../utils/utils').apiAuthenticated;
 var sql = require('../utils/query');
 
 var RANGE = 12;
@@ -25,7 +24,7 @@ function datesFromRange(rangeParam) {
 }
 
 router.route('/people')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
 
         // Get a Postgres client from the connection pool
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
@@ -43,17 +42,17 @@ router.route('/people')
             });
         });
     })
-    .post(apiAuthenticated, function(req, res) {
+    .post(function(req, res) {
         res.err(new Error('POST Not implemented'));
     });
 
 router.route('/people/permissions')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         res.json(req.session.user);
     });
 
 router.route('/people/me')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
 
         // Get a Postgres client from the connection pool
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
@@ -74,7 +73,7 @@ router.route('/people/me')
     });
 
 router.route('/people/:id')
-    .get(apiAuthenticated, function(req, res) {
+    .get(function(req, res) {
         var personId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool
@@ -96,7 +95,7 @@ router.route('/people/:id')
     });
 
 router.route('/people/:id/rota')
-    .post(apiAuthenticated, function(req, res) {
+    .post(function(req, res) {
         // Calculate the from and to dates
         var dates = datesFromRange(req.body.range);
         var fromDate = dates[0];
@@ -155,7 +154,7 @@ router.route('/people/:id/rota')
     });
 
 router.route('/people/:id/away')
-    .post(apiAuthenticated, function(req, res) {
+    .post(function(req, res) {
         // Calculate the from and to dates
         var dates = datesFromRange(req.body.range);
         var fromDate = dates[0];

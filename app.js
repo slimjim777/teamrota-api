@@ -13,6 +13,8 @@ var pg = require('pg');
 var pgSession = require('connect-pg-simple')(session);
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 var authenticate = require('./utils/utils').authenticate;
+var expressJwt = require('express-jwt');
+var jwt = require('jsonwebtoken');
 
 var SESSION_MAX_AGE = 86400000;
 
@@ -71,14 +73,13 @@ app.use( passport.session());
 
 var routes = require('./routes/index');
 var rota = require('./routes/rota');
-var users = require('./routes/users');
 var people = require('./routes/people');
 var events = require('./routes/events');
 var eventdates = require('./routes/eventdates');
 
 app.use('/', routes);
 app.use('/rota', rota);
-app.use('/users', users);
+app.use('/api', expressJwt({secret: process.env.APP_SECRET}));
 app.use('/api', people);
 app.use('/api', events);
 app.use('/api', eventdates);

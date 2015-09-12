@@ -2,6 +2,8 @@
 var pg = require('pg');
 var async = require('async');
 var sql = require('../utils/query');
+var jwt = require('jsonwebtoken');
+var SESSION_MAX_AGE_mins = 1440;
 
 
 var utils = {
@@ -10,12 +12,6 @@ var utils = {
             return next();
         }
         res.redirect('/');
-    },
-    apiAuthenticated: function(req, res, next) {
-        if (req.isAuthenticated()) {
-            return next();
-        }
-        res.status(401).send({success: false, message: 'NOT authenticated.'});
     },
 
     authenticate: function(request, profile) {
@@ -74,6 +70,10 @@ var utils = {
                         // Store the events that the user can administrate
                         user.eventAdministrate = records;
                         request.session.user = user;
+
+                        // Add the JWT token to the session
+                        request.session.token = jwt.sign(
+                            user, process.env.APP_SECRET, { expiresInMinutes: SESSION_MAX_AGE_mins });
 
                         request.session.save(function() {
                             client.end();
