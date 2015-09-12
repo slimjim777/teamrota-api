@@ -1,11 +1,11 @@
+'use strict';
 var React = require('react');
-var Event = require('../models/event');
 var moment = require('moment');
 
 
 var EventDetailPanel = React.createClass({
 
-    renderActive: function() {
+    renderActive: function () {
         if (this.props.model.active) {
             return (
                 <span className="glyphicon glyphicon-ok"></span>

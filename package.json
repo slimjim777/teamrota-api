@@ -16,6 +16,7 @@
     ]
   },
   "devDependencies": {
+    "eslint": "^1.4.1",
     "gulp": "^3.9.0",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",

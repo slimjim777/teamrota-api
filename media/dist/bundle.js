@@ -1,4 +1,5 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var Person = require('../models/person');
 var moment = require('moment');
@@ -73,7 +74,7 @@ module.exports = AwayDates;
 'use strict';
 var React = require('react');
 var Router = require('react-router');
-var Event = require('../models/event');
+var EventModel = require('../models/event');
 var Person = require('../models/person');
 var EventDate = require('../models/eventdate');
 var $ = require('jquery');
@@ -123,7 +124,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
         if (!this.state.user) {
             return false;
         }
-        if (this.state.user.role == 'admin') {
+        if (this.state.user.role === 'admin') {
             return true;
         }
         if (!this.props.params.id) {
@@ -131,7 +132,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
         }
         var eventId = parseInt(this.props.params.id);
         for (var i=0; i < this.state.user.eventAdministrate.length; i++) {
-            if (this.state.user.eventAdministrate[i].event_id == eventId) {
+            if (this.state.user.eventAdministrate[i].event_id === eventId) {
                 return true;
             }
         }
@@ -141,7 +142,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
     getEvent: function(modelId) {
         var self = this;
         self.setState({eventLoading: true });
-        var result = Event.findById(modelId);
+        var result = EventModel.findById(modelId);
         result.done(function(data) {
             self.setState({model: data.model, eventLoading: false });
         });
@@ -150,7 +151,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
     getEventDates: function(modelId) {
         var self = this;
         self.setState({eventDatesLoading: true });
-        var result = Event.dates(modelId);
+        var result = EventModel.dates(modelId);
         result.done(function(data) {
             if ((!self.state.dateId) && (data.dates.length > 0)) {
                 var firstDate = data.dates[0];
@@ -225,6 +226,7 @@ var EventDetail = React.createClass({displayName: "EventDetail",
 
 module.exports = EventDetail;
 },{"../components/EventDetailDates":3,"../components/EventDetailPanel":4,"../components/EventDetailRota":5,"../components/EventDetailRotaEdit":6,"../models/event":17,"../models/eventdate":18,"../models/person":19,"jquery":21,"react":"CwoHg3","react-router":192}],3:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var moment = require('moment');
 var $ = require('jquery');
@@ -290,14 +292,14 @@ var EventDetailDates = React.createClass({displayName: "EventDetailDates",
 
 module.exports = EventDetailDates;
 },{"jquery":21,"moment":22,"react":"CwoHg3"}],4:[function(require,module,exports){
+'use strict';
 var React = require('react');
-var Event = require('../models/event');
 var moment = require('moment');
 
 
 var EventDetailPanel = React.createClass({displayName: "EventDetailPanel",
 
-    renderActive: function() {
+    renderActive: function () {
         if (this.props.model.active) {
             return (
                 React.createElement("span", {className: "glyphicon glyphicon-ok"})
@@ -372,7 +374,7 @@ var EventDetailPanel = React.createClass({displayName: "EventDetailPanel",
 });
 
 module.exports = EventDetailPanel;
-},{"../models/event":17,"moment":22,"react":"CwoHg3"}],5:[function(require,module,exports){
+},{"moment":22,"react":"CwoHg3"}],5:[function(require,module,exports){
 'use strict';
 var React = require('react');
 var moment = require('moment');
@@ -971,6 +973,7 @@ var PeopleList = React.createClass({displayName: "PeopleList",
 
 module.exports = PeopleList;
 },{"../components/PeopleFilter":11,"moment":22,"react":"CwoHg3"}],13:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var Person = require('../models/person');
 var moment = require('moment');
@@ -1154,7 +1157,7 @@ var Token = {
                 return response.token;
             });
     }
-}
+};
 
 module.exports = Token;
 },{"jquery":21}],17:[function(require,module,exports){

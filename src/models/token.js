@@ -10,6 +10,6 @@ var Token = {
                 return response.token;
             });
     }
-}
+};
 
 module.exports = Token;

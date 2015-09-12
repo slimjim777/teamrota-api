@@ -133,7 +133,7 @@ router.route('/eventdates/:id')
                     var personId = null;
                     for (var i=0; i < results.rota.length; i++) {
                         var rota = results.rota[i];
-                        if (rota.role_id == roleId) {
+                        if (rota.role_id === roleId) {
                             personId = rota.person_id;
                             break;
                         }

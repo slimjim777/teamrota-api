@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var Router = require('react-router');
-var Event = require('../models/event');
+var EventModel = require('../models/event');
 var Person = require('../models/person');
 var EventDate = require('../models/eventdate');
 var $ = require('jquery');
@@ -51,7 +51,7 @@ var EventDetail = React.createClass({
         if (!this.state.user) {
             return false;
         }
-        if (this.state.user.role == 'admin') {
+        if (this.state.user.role === 'admin') {
             return true;
         }
         if (!this.props.params.id) {
@@ -59,7 +59,7 @@ var EventDetail = React.createClass({
         }
         var eventId = parseInt(this.props.params.id);
         for (var i=0; i < this.state.user.eventAdministrate.length; i++) {
-            if (this.state.user.eventAdministrate[i].event_id == eventId) {
+            if (this.state.user.eventAdministrate[i].event_id === eventId) {
                 return true;
             }
         }
@@ -69,7 +69,7 @@ var EventDetail = React.createClass({
     getEvent: function(modelId) {
         var self = this;
         self.setState({eventLoading: true });
-        var result = Event.findById(modelId);
+        var result = EventModel.findById(modelId);
         result.done(function(data) {
             self.setState({model: data.model, eventLoading: false });
         });
@@ -78,7 +78,7 @@ var EventDetail = React.createClass({
     getEventDates: function(modelId) {
         var self = this;
         self.setState({eventDatesLoading: true });
-        var result = Event.dates(modelId);
+        var result = EventModel.dates(modelId);
         result.done(function(data) {
             if ((!self.state.dateId) && (data.dates.length > 0)) {
                 var firstDate = data.dates[0];
