@@ -48,7 +48,7 @@ router.route('/people')
 
 router.route('/people/permissions')
     .get(function(req, res) {
-        res.json(req.session.user);
+        res.json(req.user);
     });
 
 router.route('/people/me')
@@ -56,8 +56,7 @@ router.route('/people/me')
 
         // Get a Postgres client from the connection pool
         pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-
-            var query = client.query("SELECT * FROM person WHERE id=($1)", [req.session.user.userId]);
+            var query = client.query("SELECT * FROM person WHERE id=($1)", [req.user.userId]);
 
             var results = [];
             query.on('row', function(row) {
@@ -97,6 +96,7 @@ router.route('/people/:id')
 router.route('/people/:id/rota')
     .post(function(req, res) {
         // Calculate the from and to dates
+        console.log(req.body);
         var dates = datesFromRange(req.body.range);
         var fromDate = dates[0];
         var toDate = dates[1];
