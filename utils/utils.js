@@ -18,7 +18,7 @@ var utils = {
         async.waterfall([
             // First, authenticate the user using the email address
             function(callback) {
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query("SELECT * FROM person WHERE active and email = $1", [profile.email]);
 
                     var records = [];
@@ -57,7 +57,7 @@ var utils = {
                     callback('User not found', null);
                 }
 
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query(sql.permissions(), [user.userId]);
 
                     var records = [];
@@ -89,7 +89,7 @@ var utils = {
                     callback('User not found', null);
                 }
 
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query(sql.updateLastLogin(), [user.userId]);
 
                     // After all data is returned, close connection and return results

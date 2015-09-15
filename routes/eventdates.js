@@ -9,7 +9,7 @@ var sql = require('../utils/query');
 
 var eventDateSummary = function(dateId) {
     // Get a Postgres client from the connection pool
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    pg.connect(sql.databaseUrl(), function(err, client, done) {
         var query = client.query(sql.eventDate(), [dateId]);
 
         var results = [];
@@ -27,7 +27,7 @@ var eventDateSummary = function(dateId) {
 
 var eventDateRota = function(dateId) {
     // Get a Postgres client from the connection pool
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    pg.connect(sql.databaseUrl(), function(err, client, done) {
         var query = client.query(sql.eventDateRota(), [dateId]);
 
         var results = [];
@@ -49,7 +49,7 @@ router.route('/eventdates/:id')
 
         async.parallel({
             summary: function(callback) {
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query(sql.eventDate(), [dateId]);
 
                     var results = [];
@@ -66,7 +66,7 @@ router.route('/eventdates/:id')
             },
 
             roles: function(callback) {
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query(sql.eventDateRoles(), [dateId]);
 
                     var results = [];
@@ -83,7 +83,7 @@ router.route('/eventdates/:id')
             },
 
             rota: function(callback) {
-                pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
                     var query = client.query(sql.eventDateRota(), [dateId]);
 
                     var results = [];
@@ -161,7 +161,7 @@ router.route('/eventdates/:id/rota')
         var rolePerson = req.body;
 
         var getRotaForRole = function (callback) {
-            pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            pg.connect(sql.databaseUrl(), function (err, client, done) {
                 // Look for a role entry for this person
                 var query = client.query(sql.rotaForRole(), [eventDateId, roleId]);
 
@@ -181,7 +181,7 @@ router.route('/eventdates/:id/rota')
 
         var updateRotaForRole = function (err, results) {
             var query = null;
-            pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            pg.connect(sql.databaseUrl(), function (err, client, done) {
                 if (results.length === 0) {
                     // Not found: add a new rota record
                     if (personId > 0) {

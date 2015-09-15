@@ -27,7 +27,7 @@ router.route('/people')
     .get(function(req, res) {
 
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query("SELECT * FROM person order by lastname, firstname");
 
             var results = [];
@@ -55,7 +55,7 @@ router.route('/people/me')
     .get(function(req, res) {
 
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query("SELECT * FROM person WHERE id=($1)", [req.user.userId]);
 
             var results = [];
@@ -76,7 +76,7 @@ router.route('/people/:id')
         var personId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
 
             var query = client.query("SELECT * FROM person WHERE id=($1)", [personId]);
 
@@ -101,7 +101,7 @@ router.route('/people/:id/rota')
         var fromDate = dates[0];
         var toDate = dates[1];
 
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query(
                 sql.rotaForPerson(), [req.params.id, fromDate.format('YYYY-MM-DD'), toDate.format('YYYY-MM-DD')]);
 
@@ -160,7 +160,7 @@ router.route('/people/:id/away')
         var fromDate = dates[0];
         var toDate = dates[1];
 
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query(
                 sql.awayDateForPerson(), [req.params.id, fromDate.format('YYYY-MM-DD'), toDate.format('YYYY-MM-DD')]);
 

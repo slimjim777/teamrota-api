@@ -9,7 +9,7 @@ var sql = require('../utils/query');
 router.route('/events')
     .get(function(req, res) {
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query(sql.events());
 
             var results = [];
@@ -30,7 +30,7 @@ router.route('/events/:id')
         var eventId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var query = client.query(sql.eventDetail(), [eventId]);
 
             var results = [];
@@ -56,7 +56,7 @@ router.route('/events/:id/dates')
         var eventId = parseInt(req.params.id);
 
         // Get a Postgres client from the connection pool
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
             var fromDate = moment().format('YYYY-MM-DD');
             var query = client.query(sql.eventDates(), [eventId, fromDate]);
 
