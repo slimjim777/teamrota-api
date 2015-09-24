@@ -20,6 +20,11 @@ var sql = {
         return "update person set last_login=now() where id=$1";
     },
 
+    updatePerson: function() {
+        return "update person set email=$2,firstname=$3,lastname=$4," +
+               "active=$5,guest=$6,user_role=$7 where id=$1";
+    },
+
     rotaForPerson: function() {
         // Parameters:
         // 1: person.id

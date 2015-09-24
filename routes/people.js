@@ -73,7 +73,12 @@ router.route('/people/me')
 
 router.route('/people/:id')
     .get(function(req, res) {
-        var personId = parseInt(req.params.id);
+        var personId;
+        if (req.params.id === 'undefined') {
+            personId = req.user.userId;
+        } else {
+            personId = parseInt(req.params.id);
+        }
 
         // Get a Postgres client from the connection pool
         pg.connect(sql.databaseUrl(), function(err, client, done) {
@@ -91,12 +96,27 @@ router.route('/people/:id')
                 return res.json(results[0]);
             });
         });
+    })
+    .put(function(req, res) {
+        var p = req.body;
+
+        // Get a Postgres client from the connection pool
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
+
+            var query = client.query(sql.updatePerson(), [p.id, p.email, p.firstname, p.lastname, p.active, p.guest,
+                p.user_role]);
+
+            // After the update, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json({success: true});
+            });
+        });
     });
 
 router.route('/people/:id/rota')
     .post(function(req, res) {
         // Calculate the from and to dates
-        console.log(req.body);
         var dates = datesFromRange(req.body.range);
         var fromDate = dates[0];
         var toDate = dates[1];
