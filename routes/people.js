@@ -48,15 +48,28 @@ router.route('/people')
 
 router.route('/people/permissions')
     .get(function(req, res) {
-        res.json(req.user);
+        // Get a Postgres client from the connection pool
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
+            var query = client.query(sql.permissions(), [req.user.userId]);
+
+            var results = [];
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json({rota_permissions: results});
+            });
+        });
     });
 
 router.route('/people/me')
     .get(function(req, res) {
-
         // Get a Postgres client from the connection pool
         pg.connect(sql.databaseUrl(), function(err, client, done) {
-            var query = client.query("SELECT * FROM person WHERE id=($1)", [req.user.userId]);
+            var query = client.query("SELECT * FROM person WHERE user_id=($1)", [req.user.userId]);
 
             var results = [];
             query.on('row', function(row) {
@@ -69,7 +82,23 @@ router.route('/people/me')
                 return res.json(results[0]);
             });
         });
-    });
+    })
+    .post(function(req, res) {
+        var u = req.body;
+
+        // Create or update the person from the user
+        pg.connect(sql.databaseUrl(), function(err, client, done) {
+            var u = req.user;
+            var query = client.query(sql.upsertPerson(), [u.userId, u.email, u.firstname, u.lastname, u.active, u.guest,
+                u.role_rota]);
+
+            // After all data is returned, close connection and return results
+            query.on('end', function() {
+                client.end();
+                return res.json({success: true});
+            });
+        });
+    })
 
 router.route('/people/:id')
     .get(function(req, res) {

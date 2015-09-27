@@ -13,7 +13,7 @@ var sql = {
                "from person p " +
                "inner join event_admins ad on ad.person_id=p.id " +
                "inner join event e on e.id=ad.event_id " +
-               "where person_id = $1";
+               "where user_id = $1";
     },
 
     updateLastLogin: function() {
@@ -22,7 +22,16 @@ var sql = {
 
     updatePerson: function() {
         return "update person set email=$2,firstname=$3,lastname=$4," +
-               "active=$5,guest=$6,user_role=$7 where id=$1";
+               "active=$5,guest=$6,user_role=$7 where user_id=$1";
+    },
+
+    upsertPerson: function() {
+        return "WITH upsert AS (" +
+                "update person set email=$2,firstname=$3,lastname=$4," +
+                "active=$5,guest=$6,user_role=$7, last_login=now() where user_id=$1 RETURNING *) " +
+                "insert into person (user_id,email,firstname,lastname,active,guest,user_role,last_login) " +
+                "select $1,$2,$3,$4,$5,$6,$7,now()" +
+                "WHERE NOT EXISTS (SELECT * from upsert)";
     },
 
     rotaForPerson: function() {
