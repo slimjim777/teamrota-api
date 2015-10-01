@@ -132,8 +132,8 @@ router.route('/people/:id')
         // Get a Postgres client from the connection pool
         pg.connect(sql.databaseUrl(), function(err, client, done) {
 
-            var query = client.query(sql.updatePerson(), [p.id, p.email, p.firstname, p.lastname, p.active, p.guest,
-                p.user_role]);
+            var query = client.query(sql.updatePerson(), [p.user_id, p.email, p.firstname, p.lastname, p.active,
+                p.guest, p.user_role]);
 
             // After the update, close connection and return results
             query.on('end', function() {

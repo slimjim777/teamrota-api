@@ -155,67 +155,79 @@ router.route('/eventdates/:id')
         });
     });
 
+router.route('/eventdates/:id/eventdate')
+    .put(function(req, res) {
+        var eventDateId = parseInt(req.params.id);
+        var ed = req.body;
+
+        pg.connect(sql.databaseUrl(), function (err, client, done) {
+            var query = client.query(sql.updateEventDate(), [eventDateId, ed.focus, ed.notes, ed.url]);
+
+            query.on('end', function () {
+                client.end();
+                res.json({result: 'done'});
+            });
+        });
+    });
+
 router.route('/eventdates/:id/rota')
     .post(function(req, res) {
         var eventDateId = parseInt(req.params.id);
         var rolePerson = req.body;
+        var roleId = rolePerson.roleId
 
-        var getRotaForRole = function (callback) {
-            pg.connect(sql.databaseUrl(), function (err, client, done) {
-                // Look for a role entry for this person
-                var query = client.query(sql.rotaForRole(), [eventDateId, roleId]);
+        // An id of 0 means we're deselecting the person for the role
+        var personId = parseInt(rolePerson.personId);
 
-                var results = [];
-                query.on('row', function(row) {
-                    results.push(row);
-                });
+        async.series([
+            function (callback) {
+                pg.connect(sql.databaseUrl(), function (err, client, done) {
+                    // Look for a role entry for this person
+                    var query = client.query(sql.rotaForRole(), [eventDateId, roleId]);
 
-                // After all data is returned, close connection and return results
-                query.on('end', function() {
-                    client.end();
-                    callback(null, results);
-                });
+                    var results = [];
+                    query.on('row', function (row) {
+                        results.push(row);
+                    });
 
-            });
-        };
-
-        var updateRotaForRole = function (err, results) {
-            var query = null;
-            pg.connect(sql.databaseUrl(), function (err, client, done) {
-                if (results.length === 0) {
-                    // Not found: add a new rota record
-                    if (personId > 0) {
-                        query = client.query(sql.addRotaForRole(), [eventDateId, parseInt(roleId), personId]);
-                    }
-                } else {
-                    var record = results[0];
-                    if (personId > 0) {
-                        // Update the person
-                        query = client.query(sql.updateRotaForRole(), [parseInt(record.id), personId]);
-                    } else {
-                        // Delete for 0-id
-                        query = client.query(sql.deleteRotaForPerson(), [parseInt(record.id)]);
-                    }
-                }
-
-                // After all data is returned, close connection and return results
-                if (query) {
+                    // After all data is returned, close connection and return results
                     query.on('end', function () {
                         client.end();
+                        callback(null, results);
                     });
-                }
+
+                });
+            }],
+            function (err, resultsArray) {
+                var query = null;
+                var records = resultsArray[0];
+
+                pg.connect(sql.databaseUrl(), function (err, client, done) {
+                    if (records.length === 0) {
+                        // Not found: add a new rota record
+                        if (personId > 0) {
+                            query = client.query(sql.addRotaForRole(), [eventDateId, parseInt(roleId), personId]);
+                        }
+                    } else {
+                        var record = records[0];
+                        if (personId > 0) {
+                            // Update the person
+                            query = client.query(sql.updateRotaForRole(), [parseInt(record.id), personId]);
+                        } else {
+                            // Delete for 0-id
+                            query = client.query(sql.deleteRotaForPerson(), [parseInt(record.id)]);
+                        }
+                    }
+
+                    // After all data is returned, close connection and return results
+                    if (query) {
+                        query.on('end', function () {
+                            client.end();
+                        });
+                    }
+                });
             });
-        };
 
-        // Iterate the role-person pairs
-        for (var roleId in rolePerson) {
-            if (rolePerson.hasOwnProperty(roleId)) {
-                // An id of 0 means we're deselecting the person for the role
-                var personId = parseInt(rolePerson[roleId]);
-
-                async.waterfall([getRotaForRole], updateRotaForRole);
-            }
-        }
         res.json({result: 'done'});
     });
 

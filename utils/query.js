@@ -88,6 +88,10 @@ var sql = {
         return "select * from event_date where id = $1";
     },
 
+    updateEventDate: function() {
+        return "update event_date set focus=$2, notes=$3, url=$4 where id = $1";
+    },
+
     eventDateRota: function() {
         // Parameters:
         // 1: eventdate.id
