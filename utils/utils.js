@@ -3,7 +3,7 @@ var pg = require('pg');
 var async = require('async');
 var sql = require('../utils/query');
 var jwt = require('jsonwebtoken');
-var SESSION_MAX_AGE_mins = 1440;
+var SESSION_MAX_AGE_mins = require('./constants').SESSION_MAX_AGE_mins;
 
 
 var utils = {
@@ -19,7 +19,7 @@ var utils = {
             // First, authenticate the user using the email address
             function(callback) {
                 pg.connect(sql.databaseUrl(), function(err, client, done) {
-                    var query = client.query("SELECT * FROM person WHERE active and email = $1", [profile.email]);
+                    var query = client.query(sql.personByEmail(), [profile.email]);
 
                     var records = [];
                     query.on('row', function(row) {

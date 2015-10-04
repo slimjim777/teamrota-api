@@ -16,6 +16,10 @@ var sql = {
                "where user_id = $1";
     },
 
+    personByEmail: function() {
+        return "SELECT * FROM person WHERE active and email = $1";
+    },
+
     updateLastLogin: function() {
         return "update person set last_login=now() where id=$1";
     },
@@ -116,6 +120,10 @@ var sql = {
     },
 
     eventDateRoles: function() {
+        // Parameters:
+        // 1: event.id
+        // 2: eventdate.on_date from
+        // 3: eventdate.on_date to
         return "select r.id role_id, r.sequence, r.name role_name, firstname, lastname, " +
                 "p.active person_active, p.id person_id, on_date, " +
                 "    exists(select 1 from away_date where person_id=p.id " +
@@ -128,11 +136,38 @@ var sql = {
                 "order by sequence, r.id";
     },
 
+    eventRota: function() {
+        return "select ev.name event_name, ev.id event_id, on_date," +
+                "role.name role_name, firstname, lastname, role.id role_id," +
+                "ed.id event_date_id, p.active person_active, p.id person_id," +
+                "exists(select 1 from away_date where person_id=p.id " +
+                "and on_date between from_date and to_date) is_away," +
+                "ed.focus, ed.notes, ed.url," +
+                "exists(select 1 from rota rr " +
+                "inner join event_date eded on rr.event_date_id=eded.id " +
+                "where rr.event_date_id<>ed.id " +
+                "and rr.person_id=p.id " +
+                "and eded.on_date=ed.on_date) on_rota " +
+                "from event_date ed " +
+                "inner join event ev on ed.event_id=ev.id " +
+                "inner join rota r on r.event_date_id=ed.id " +
+                "inner join role on r.role_id = role.id " +
+                "inner join person p on r.person_id=p.id " +
+                "where ev.id = $1 " +
+                "and ed.on_date >= $2 " +
+                "and ed.on_date <= $3 " +
+                "order by on_date, sequence";
+    },
+
     rotaForRole: function() {
         // Parameters:
         // 1: eventdate.id
         // 2: role_id
         return "select * from rota where event_date_id=$1 and role_id=$2";
+    },
+
+    rolesForEvent: function() {
+        return "select * from role where event_id=$1 order by sequence";
     },
 
     addRotaForRole: function() {
