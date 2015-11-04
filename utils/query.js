@@ -92,6 +92,23 @@ var sql = {
         return "select * from event_date where id = $1";
     },
 
+    eventDateOnDate: function() {
+        // Parameters:
+        // 1: eventdate.event_id
+        // 1: eventdate.on_date
+        return "select * from event_date where event_id = $1 and on_date = $2";
+    },
+
+    upsertEventDate: function() {
+        return "WITH upsert AS (" +
+            "update event_date set focus=$3,notes=$4,url=$5 " +
+            "where event_id=$1 and on_date=$2 RETURNING *) " +
+            "insert into event_date (event_id,on_date,focus,notes,url) " +
+            "select $1,$2,$3,$4,$5 " +
+            "WHERE NOT EXISTS (SELECT * from upsert)";
+    },
+
+
     updateEventDate: function() {
         return "update event_date set focus=$2, notes=$3, url=$4 where id = $1";
     },
@@ -119,11 +136,49 @@ var sql = {
                 "order by role.sequence";
     },
 
-    eventDateRoles: function() {
+    eventDateRotaOnDate: function() {
+        // Parameters:
+        // 1: eventdate.event_id
+        // 2: eventdate.on_date
+        return "select ev.name event_name, ev.id event_id, on_date, " +
+            "role.name role_name, firstname, lastname, role.id role_id, " +
+            "    ed.id event_date_id, p.active person_active, p.id person_id, " +
+            "    exists(select 1 from away_date where person_id=p.id " +
+            "and on_date between from_date and to_date) is_away, " +
+            "    ed.focus, ed.notes, " +
+            "    exists(select 1 from rota rr " +
+            "inner join event_date eded on rr.event_date_id=eded.id " +
+            "where rr.person_id=p.id " +
+            "and eded.id<>ed.id " +
+            "and eded.on_date=ed.on_date) on_rota " +
+            "from rota r " +
+            "inner join event_date ed on r.event_date_id=ed.id " +
+            "inner join event ev on ed.event_id=ev.id " +
+            "inner join person p on r.person_id=p.id " +
+            "inner join role on role.id = r.role_id " +
+            "where ed.event_id = $1 " +
+            "and ed.on_date = $2 " +
+            "order by role.sequence";
+    },
+
+    rolesForDate: function() {
         // Parameters:
         // 1: event.id
-        // 2: eventdate.on_date from
-        // 3: eventdate.on_date to
+        // 2: on_date
+        return "select r.id role_id, r.sequence, r.name role_name, firstname, lastname, " +
+            "p.active person_active, p.id person_id, " +
+            "    exists(select 1 from away_date where person_id=p.id " +
+            "and $2 between from_date and to_date) is_away " +
+            "from role r " +
+            "left outer join role_people rp on rp.role_id=r.id " +
+            "left outer join person p on p.id=rp.person_id " +
+            "where r.event_id = $1 " +
+            "order by sequence, r.id";
+    },
+
+    eventDateRoles: function() {
+        // Parameters:
+        // 1: eventdate.id
         return "select r.id role_id, r.sequence, r.name role_name, firstname, lastname, " +
                 "p.active person_active, p.id person_id, on_date, " +
                 "    exists(select 1 from away_date where person_id=p.id " +
@@ -150,9 +205,9 @@ var sql = {
                 "and eded.on_date=ed.on_date) on_rota " +
                 "from event_date ed " +
                 "inner join event ev on ed.event_id=ev.id " +
-                "inner join rota r on r.event_date_id=ed.id " +
-                "inner join role on r.role_id = role.id " +
-                "inner join person p on r.person_id=p.id " +
+                "left outer join rota r on r.event_date_id=ed.id " +
+                "left outer join role on r.role_id = role.id " +
+                "left outer join person p on r.person_id=p.id " +
                 "where ev.id = $1 " +
                 "and ed.on_date >= $2 " +
                 "and ed.on_date <= $3 " +

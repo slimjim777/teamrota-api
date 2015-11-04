@@ -75,6 +75,121 @@ router.route('/events/:id/dates')
         });
     });
 
+router.route('/events/:id/date/:onDate')
+    .get(function(req, res) {
+        var eventId = parseInt(req.params.id);
+        var onDate = req.params.onDate;
+
+        async.parallel({
+            summary: function(callback) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
+                    var query = client.query(sql.eventDateOnDate(), [eventId, onDate]);
+
+                    var results = [];
+                    query.on('row', function(row) {
+                        results.push(row);
+                    });
+
+                    // After all data is returned, close connection and return results
+                    query.on('end', function() {
+                        client.end();
+                        callback(null, results);
+                    });
+                });
+            },
+
+            roles: function(callback) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
+                    var query = client.query(sql.rolesForDate(), [eventId, onDate]);
+
+                    var results = [];
+                    query.on('row', function(row) {
+                        results.push(row);
+                    });
+
+                    // After all data is returned, close connection and return results
+                    query.on('end', function() {
+                        client.end();
+                        callback(null, results);
+                    });
+                });
+            },
+
+            rota: function(callback) {
+                pg.connect(sql.databaseUrl(), function(err, client, done) {
+                    var query = client.query(sql.eventDateRotaOnDate(), [eventId, onDate]);
+
+                    var results = [];
+                    query.on('row', function(row) {
+                        results.push(row);
+                    });
+
+                    // After all data is returned, close connection and return results
+                    query.on('end', function() {
+                        client.end();
+                        callback(null, results);
+                    });
+                });
+            }
+
+        }, function(err, results) {
+            // results is now equals to: {summary: [], roles: [], rota: []}
+            var eventDate = {summary:{}, roles: results.roles, rota: results.rota};
+            if (results.summary.length > 0) {
+                eventDate.summary = results.summary[0];
+            }
+
+            // Pivot roles by sequence
+            var roles = eventDate.roles.reduce(function(prev, curr) {
+                var seq = ('0000'+ curr.sequence).slice(-4);
+                if (seq in prev) {
+                    prev[seq].push(curr);
+                } else {
+                    prev[seq] = [curr];
+                }
+                return prev;
+            }, {});
+
+            // Convert to an array
+            var roleArray = [];
+            for (var prop in roles) {
+                if (roles.hasOwnProperty(prop)) {
+                    var roleList = roles[prop];
+                    var roleName = '';
+                    var roleId = null;
+                    if (roleList.length > 0) {
+                        roleName = roleList[0].role_name;
+                        roleId = roleList[0].role_id;
+                    }
+
+                    // Find the person in the rota for the role
+                    var personId = null;
+                    for (var i=0; i < results.rota.length; i++) {
+                        var rota = results.rota[i];
+                        if (rota.role_id === roleId) {
+                            personId = rota.person_id;
+                            break;
+                        }
+                    }
+
+                    // Reformat the role info for display
+                    var roleRota = {
+                        roleId: roleId,
+                        roleName: roleName,
+                        roles: roleList,
+                        personId: personId
+                    };
+                    roleArray.push(roleRota);
+                }
+            }
+            eventDate.roles = roleArray;
+
+            return res.json(eventDate);
+        });
+
+
+    });
+
 router.route('/events/:id/roles')
     .get(function(req, res) {
         var eventId = parseInt(req.params.id);
@@ -113,6 +228,7 @@ function checkRotaForDate(currentDate, records, roles) {
             eventDetail.roles[rota.role_id] = rota;
             //eventDetail.roles.push(rota);
             if (!eventDetail.focus) {
+                eventDetail.event_date_id = rota.event_date_id;
                 eventDetail.focus = rota.focus;
                 eventDetail.notes = rota.notes;
                 eventDetail.url = rota.url;
