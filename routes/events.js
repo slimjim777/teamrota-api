@@ -6,6 +6,7 @@ var moment = require('moment');
 var sql = require('../utils/query');
 var async = require('async');
 var OVERVIEW_WEEKS = require('../utils/constants').OVERVIEW__WEEKS;
+var DAY_OF_WEEK = require('../utils/constants').DAY_OF_WEEK;
 
 
 router.route('/events')
@@ -59,8 +60,7 @@ router.route('/events/:id/dates')
 
         // Get a Postgres client from the connection pool
         pg.connect(sql.databaseUrl(), function(err, client, done) {
-            var fromDate = moment().format('YYYY-MM-DD');
-            var query = client.query(sql.eventDates(), [eventId, fromDate]);
+            var query = client.query(sql.eventDetail(), [eventId]);
 
             var results = [];
             query.on('row', function(row) {
@@ -70,7 +70,21 @@ router.route('/events/:id/dates')
             // After all data is returned, close connection and return results
             query.on('end', function() {
                 client.end();
-                return res.json({dates: results});
+
+                // Get the nearest Sunday from the 'from date'
+                var fromDate = moment().format('YYYY-MM-DD');
+                var currentDate = moment(fromDate).day(0);
+                var rotaDates = [];
+                var eventDetail = results[0];
+                while(rotaDates.length < 12) {
+                    DAY_OF_WEEK.map(function(d) {
+                        if (eventDetail[d.key]) {
+                            rotaDates.push(currentDate.day(d.value).format('YYYY-MM-DD'));
+                        }
+                    });
+                    currentDate = currentDate.add(1, 'weeks');
+                }
+                return res.json({dates: rotaDates});
             });
         });
     });
